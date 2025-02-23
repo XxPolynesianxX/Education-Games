@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>capital cities</title>
+  <style>
+    body {
+      background-color: #f0f8ff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    #game-container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: #fff;
+      border: 2px solid #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-top: 0;
+    }
+    #word {
+      font-size: 2em;
+      margin: 20px 0;
+      color: #333;
+    }
+    #score, #timer {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    #input-word {
+      padding: 10px;
+      font-size: 1.2em;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #start-button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      cursor: pointer;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+    #start-button:hover {
+      background: #218838;
+    }
+    #message {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>Type Shark Clone</h1>
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 120</div>
+    <div id="word">Press Start!</div>
+    <input type="text" id="input-word" placeholder="Type the word here" disabled />
+    <br/>
+    <button id="start-button">Start Game</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // Array of sample words. Expand this list as needed.
+    const words = [
+      "Afghanistan", "Kabul",
+      "Albania", "Tirana",
+      "Algeria", "Algiers",
+      "Andorra", "Andorra-la-Vella",
+      "Angola", "Luanda",
+      "Antigua", "St-John's",
+      "Argentina", "Buenos-Aires",
+      "Armenia", "Yerevan",
+      "Australia", "Canberra",
+      "Austria", "Vienna",
+      "Azerbaijan", "Baku",
+      "Bahamas", "Nassau",
+      "Bahrain", "Manama",
+      "Bangladesh", "Dhaka",
+      "Barbados", "Bridgetown",
+      "Belarus", "Minsk",
+      "Belgium", "Brussels",
+      "Belize", "Belmopan",
+      "Benin", "Porto-Novo",
+      "Bhutan", "Thimphu",
+      "Bolivia", "Sucre",
+      "Bosnia", "Sarajevo",
+      "Botswana", "Gaborone",
+      "Brazil", "Brasilia",
+      "Brunei", "Bandar-Seri-Begawan",
+      "Bulgaria", "Sofia",
+      "Burkina", "Ouagadougou",
+      "Burundi", "Gitega",
+      "Cambodia", "Phnom-Penh",
+      "Cameroon", "Yaounde",
+      "Canada", "Ottawa",
+      "Cape-Verde", "Praia",
+      "Central-African", "Bangui",
+      "Chad", "NDjamena",
+      "Chile", "Santiago",
+      "China", "Beijing",
+      "Colombia", "Bogota",
+      "Comoros", "Moroni",
+      "Costa-Rica", "San-Jose",
+      "Croatia", "Zagreb",
+      "Cuba", "Havana",
+      "Cyprus", "Nicosia",
+      "Czechia", "Prague",
+      "Denmark", "Copenhagen",
+      "Djibouti", "Djibouti",
+      "Dominica", "Roseau",
+      "Dominican", "Santo-Domingo",
+      "Ecuador", "Quito",
+      "Egypt", "Cairo",
+      "El-Salvador", "San-Salvador"
+      "Fiji", "Suva",
+  "Finland", "Helsinki",
+  "France", "Paris",
+  "Gabon", "Libreville",
+  "Gambia", "Banjul",
+  "Georgia", "Tbilisi",
+  "Germany", "Berlin",
+  "Ghana", "Accra",
+  "Greece", "Athens",
+  "Grenada", "St-Georges",
+  "Guatemala", "Guatemala-City",
+  "Guinea", "Conakry",
+  "Guyana", "Georgetown",
+  "Haiti", "Port-au-Prince",
+  "Honduras", "Tegucigalpa",
+  "Hungary", "Budapest",
+  "Iceland", "Reykjavik",
+  "India", "New-Delhi",
+  "Indonesia", "Jakarta",
+  "Iran", "Tehran",
+  "Iraq", "Baghdad",
+  "Ireland", "Dublin",
+  "Israel", "Jerusalem",
+  "Italy", "Rome",
+  "Jamaica", "Kingston",
+  "Japan", "Tokyo",
+  "Jordan", "Amman",
+  "Kazakhstan", "Nur-Sultan",
+  "Kenya", "Nairobi",
+  "Kiribati", "Tarawa",
+  "Kuwait", "Kuwait-City",
+  "Kyrgyzstan", "Bishkek",
+  "Laos", "Vientiane",
+  "Latvia", "Riga",
+  "Lebanon", "Beirut",
+  "Lesotho", "Maseru",
+  "Liberia", "Monrovia",
+  "Libya", "Tripoli",
+  "Liechtenstein", "Vaduz",
+  "Lithuania", "Vilnius",
+  "Luxembourg", "Luxembourg",
+  "Madagascar", "Antananarivo",
+  "Malawi", "Lilongwe",
+  "Malaysia", "Kuala-Lumpur",
+  "Maldives", "Malé",
+  "Mali", "Bamako",
+  "Malta", "Valletta",
+  "Marshall-Islands", "Majuro",
+  "Mauritania", "Nouakchott",
+  "Mexico", "Mexico-City"
+    ];
+
+    let currentWord = "";
+    let score = 0;
+    let totalTime = 120; // Total game time in seconds (2 minutes)
+    let timerInterval;
+
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const wordDisplay = document.getElementById("word");
+    const inputWord = document.getElementById("input-word");
+    const startButton = document.getElementById("start-button");
+    const messageDisplay = document.getElementById("message");
+
+    // Get a random word from the list
+    function getRandomWord() {
+      return words[Math.floor(Math.random() * words.length)];
+    }
+
+    // Calculate score based on word complexity (here, length * 10)
+    function calculateScore(word) {
+      return word.length * 10;
+    }
+
+    // Start the game: reset score, totalTime, and update UI
+    function startGame() {
+      score = 0;
+      totalTime = 120;
+      scoreDisplay.textContent = "Score: " + score;
+      timerDisplay.textContent = "Time: " + totalTime;
+      messageDisplay.textContent = "";
+      inputWord.disabled = false;
+      inputWord.value = "";
+      inputWord.focus();
+      setNewWord();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Set a new word for the player to type
+    function setNewWord() {
+      currentWord = getRandomWord();
+      wordDisplay.textContent = currentWord;
+      inputWord.value = "";
+    }
+
+    // Update the timer every second; end game when totalTime runs out
+    function updateTimer() {
+      totalTime--;
+      timerDisplay.textContent = "Time: " + totalTime;
+      if (totalTime <= 0) {
+        endGame();
+      }
+    }
+
+    // End the game and display the final score
+    function endGame() {
+      clearInterval(timerInterval);
+      inputWord.disabled = true;
+      messageDisplay.textContent = "Time's up! Your final score is " + score + ".";
+      wordDisplay.textContent = "Game Over";
+    }
+
+    // Check the player's input against the current word
+    inputWord.addEventListener("input", function() {
+      if (inputWord.value.trim().toLowerCase() === currentWord.toLowerCase()) {
+        // Word is correct: add score based on the word's complexity
+        score += calculateScore(currentWord);
+        scoreDisplay.textContent = "Score: " + score;
+        setNewWord();
+      }
+    });
+
+    // Attach event listener to start button
+    startButton.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
